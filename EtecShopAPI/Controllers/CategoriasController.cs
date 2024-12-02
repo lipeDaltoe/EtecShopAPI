@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
 using EtecShopAPI.Data;
+using EtecShopAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -40,4 +36,33 @@ public class CategoriasController(AppDbContext db) : ControllerBase
         await _db.SaveChangesAsync();
         return CreatedAtAction(nameof(Get), categoria.Id, new { categoria });
     }
+
+    [HttpPut("{id}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> Edit(int id, [FromBody] Categoria categoria)
+    {
+        if (!ModelState.IsValid || id != categoria.Id)
+            return BadRequest("Categoria informada com problemas");
+        if (!_db.Categorias.Any(c => c.Id == id))
+            return NotFound("Categoria não encontrada!");
+        _db.Categorias.Update(categoria);
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> Delete(int id)
+    {
+        Categoria categoria = _db.Categorias.Find(id);
+        if (categoria == null)
+            return NotFound("Categoria não encontrada!");
+        _db.Categorias.Remove(categoria);
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
 }
